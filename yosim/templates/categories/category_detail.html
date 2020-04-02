@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% load static i18n %}
+
+{% block title %}Category details{% endblock %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-lg-12">
+        <h2 class="page-header">Category details</h2>
+    </div>
+    <!-- /.col-lg-12 -->
+</div>
+<!-- /.row -->
+
+<div class="row">
+    <div class="col-lg-12 category-section">
+        <span>cat_id: {{ category.cat_id }}</span>
+        <span>cat_name: {{ category.cat_name }}</span>
+    </div>
+</div>
+<!-- /.row -->
+
+{% endblock content %}

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% load static i18n %}
+
+{% block title %}Signature category mapping details{% endblock %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-lg-12">
+        <h2 class="page-header">Signature category mapping details</h2>
+    </div>
+    <!-- /.col-lg-12 -->
+</div>
+<!-- /.row -->
+
+<div class="row">
+    <div class="col-lg-12 sig-cat-mapping-section">
+        <span>id: {{ sig_cat_mapping.id }}</span>
+        <span>rule_id: {{ sig_cat_mapping.rule_id }}</span>
+        <span>cat_id: {{ sig_cat_mapping.cat_id }}</span>
+    </div>
+</div>
+<!-- /.row -->
+
+{% endblock content %}

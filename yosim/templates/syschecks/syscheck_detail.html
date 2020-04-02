@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+
+{% load static i18n %}
+{% load custom_syscheck_tags %}
+
+{% block title %}Syscheck details{% endblock %}
+
+{% block content %}
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1>Syschecks</h1>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="box box-default">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Syscheck details for: {{ syscheck.fpath }}</h3>
+                    <div class="box-tools pull-right">
+                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                        <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-remove"></i></button>
+                    </div>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                    <!-- <div class="row">
+                        <div class="col-sm-2">
+                            <label>File changes</label>
+                        </div>
+                        <div class="col-sm-10">
+                            {{ syscheck.changes }}
+                        </div>
+                    </div> -->
+
+                    {% if syscheck.size == -1 %}
+                        <div class="row">
+                            <div class="col-sm-2">
+                                <label>Current file size</label>
+                            </div>
+                            <div class="col-sm-10">
+                                <span class="label label-danger label-large">File was deleted</span>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="row">
+                            <div class="col-sm-2">
+                                <label>Current file size</label>
+                            </div>
+                            <div class="col-sm-10">
+                                {{ syscheck.size }} <i>KB</i>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-2">
+                                <label>File permissions</label>
+                            </div>
+                            <div class="col-sm-10">
+                                {{ syscheck.perms|to_readable_permissions }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-2">
+                                <label>File owner</label>
+                            </div>
+                            <div class="col-sm-10">
+                                User({{ syscheck.uname }}) - Group({{ syscheck.gname }})
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-2">
+                                <label>Latest MD5</label>
+                            </div>
+                            <div class="col-sm-10">
+                                {{ syscheck.md5 }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-2">
+                                <label>Latest SHA1</label>
+                            </div>
+                            <div class="col-sm-10">
+                                {{ syscheck.sha1 }}
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <div class="row">
+                        <div class="col-sm-2">
+                            <label>Latest modified time</label>
+                        </div>
+                        <div class="col-sm-10">
+                            <span>{{ syscheck.mtime|timestamp_convert }}</span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-2">
+                            <label>From server/agents</label>
+                        </div>
+                        <div class="col-sm-10">
+                            {{ syscheck.syschk_fpath | to_syscheck_node }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-2">
+                            <label>Current file content</label>
+                        </div>
+                        <div class="col-sm-10">
+                            {% if syscheck.ftype and not syscheck.ftype == 'text/plain' %}
+                                <a href="{% url 'syschecks:download' syscheck.id %}" class="btn btn-default" role="button" style="margin-bottom: 10px;">Download</a>
+                            {% else %}
+                                {% if curr_content %}
+                                    <div class="panel panel-default">
+                                        <div class="panel-body">
+                                            <div class="pre-scrollable">
+                                                {{ curr_content |linebreaks }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    <span class="label label-danger">File not found</span>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="nav-tabs-custom">
+                                <ul class="nav nav-tabs">
+                                    <li class="pull-left header"><i class="fa fa-th"></i> Compare current file</li>
+                                    <li class="active"><a href="#to_previous" data-toggle="tab">To Previous</a></li>
+                                    <li><a href="#to_all" data-toggle="tab">To All</a></li>
+                                </ul>
+                                <div class="tab-content">
+                                    <div class="tab-pane active" id="to_previous">
+                                        {% if previous_diffs %}
+                                            {% for timestamp, changes in previous_diffs.items %}
+                                                <div class="panel box box-primary">
+                                                    <div class="box-header with-border">
+                                                        <h4 class="box-title"><strong>{{ timestamp|timestamp_convert }}</strong></h4>
+                                                    </div>
+                                                    <div class="box-body">
+                                                        <ul class="list-group">
+                                                            {% for field, value in changes.items %}
+                                                                {% if field != 'git_diff_content' and field != 'syschk_id' %}
+                                                                    <li class="list-group-item">
+                                                                      {{ field|title }} changed: {{ value.old }} &rarr; {{ value.new }}
+                                                                      {% if field == 'size' %}<i>(KB)</i>{% endif %}
+                                                                    </li>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                            {% if changes.git_diff_content %}
+                                                                <li class="list-group-item git-diff-content" id="diff-previous-{{ timestamp }}">
+                                                                    {{ changes.git_diff_content }}
+                                                                </li>
+                                                            {% endif %}
+                                                        </ul>
+                                                        {% if changes.syschk_id %}
+                                                            <div class="btn-group" role="group" aria-label="...">
+                                                                <a href="{% url 'syschecks:download' changes.syschk_id %}" class="btn btn-default" role="button">Download</a>
+                                                            </div>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                        {% else %}
+                                            <div class="row">
+                                                <div class="col-sm-12"><h5>No changes was found</h5></div>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <!-- /.tab-pane -->
+                                    <div class="tab-pane" id="to_all">
+                                        <div class="box-group" id="to-all-collapse">
+                                            {% if all_diffs %}
+                                                {% for timestamp, changes in all_diffs.items %}
+                                                    <div {% if syscheck.mtime == timestamp %}class="panel box box-primary"
+                                                         {% else %}class="panel box"{% endif %}>
+                                                        <div class="box-header with-border">
+                                                            <h4 class="box-title">
+                                                                <a data-toggle="collapse" data-parent="#to-all-collapse" href="#collapse-{{ timestamp }}">
+                                                                  <strong>{{ timestamp|timestamp_convert }}</strong>
+                                                                </a>
+                                                            </h4>
+                                                        </div>
+                                                        <div id="collapse-{{ timestamp }}" {% if syscheck.mtime == timestamp %}
+                                                                class="panel-collapse collapse in"{% else %}class="panel-collapse collapse"{% endif %}>
+                                                            <div class="box-body">
+                                                                <ul class="list-group">
+                                                                    {% for field, value in changes.items %}
+                                                                        {% if field != 'git_diff_content' and field != 'syschk_id' %}
+                                                                            <li class="list-group-item">
+                                                                              {{ field|title }} changed: {{ value.old }} &rarr; {{ value.new }}
+                                                                              {% if field == 'size' %}<i>(KB)</i>{% endif %}
+                                                                            </li>
+                                                                        {% endif %}
+                                                                    {% endfor %}
+                                                                    {% if changes.git_diff_content %}
+                                                                        <li class="list-group-item git-diff-content" id="diff-all-{{ timestamp }}">
+                                                                            {{ changes.git_diff_content }}
+                                                                        </li>
+                                                                    {% endif %}
+                                                                </ul>
+                                                                {% if changes.syschk_id %}
+                                                                    <div class="btn-group" role="group" aria-label="...">
+                                                                        <a href="{% url 'syschecks:download' changes.syschk_id %}" class="btn btn-default" role="button">Download</a>
+                                                                    </div>
+                                                                {% endif %}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                {% endfor %}
+                                            {% else %}
+                                                <div class="row">
+                                                    <div class="col-sm-12"><h5>No changes was found</h5></div>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <!-- /.tab-pane -->
+                                </div>
+                                <!-- /.tab-content -->
+                            </div>
+                        <!-- nav-tabs-custom -->
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <a class="btn btn-default btn-outline-default" role="button" onclick="history.back()">Back to syschecks</a>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.box-body -->
+            </div>
+            <!-- /.box -->
+        </div>
+        <!-- /.col-lg-12 -->
+    </div>
+    <!-- /.row -->
+</section>
+
+{% endblock content %}
+
+{% block custom_javascript %}
+
+    <script type="text/javascript">
+        $( document ).ready(function() {
+            $(".git-diff-content").each(function(index) {
+                var diffContent = $(this).html();
+                var elementId = '#' + $(this).attr('id');
+                var diff2htmlUi = new Diff2HtmlUI({diff: diffContent});
+                diff2htmlUi.draw(elementId, {inputFormat: 'json', matching: 'lines'});
+                diff2htmlUi.highlightCode(elementId);
+            });
+        });
+    </script>
+
+{% endblock custom_javascript %}

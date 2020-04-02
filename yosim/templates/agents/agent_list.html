@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% load static i18n %}
+{% load custom_pagination %}
+
+{% block title %}All hosts{% endblock %}
+
+{% block content %}
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1>OSSEC Hosts</h1>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="box box-default">
+                <div class="box-header with-border">
+                    <h3 class="box-title">All hosts</h3>
+                    <div class="box-tools pull-right">
+                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                        <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-remove"></i></button>
+                    </div>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                    {% if agents %}
+                    <table id="agents-table" class="table table-responsive table-striped table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Host ID</th>
+                                <th>Status</th>
+                                <th>IP Address</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for agent in agents %}
+                                <tr>
+                                    <td>{{ agent.name }}</td>
+                                    <td>{{ agent.agent_id }}</td>
+                                    <td>{{ agent.agent_status }}</td>
+                                    <td>{{ agent.ip_address }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <!-- /#alerts-table -->
+                    {% else %}
+                        <h4>No agents was found</h4>
+                    {% endif %}
+                </div>
+                <!-- /.box-body -->
+            </div>
+            <!-- /.box -->
+        </div>
+        <!-- /.col-lg-12 -->
+    </div>
+    <!-- /.row -->
+
+</section>
+
+{% endblock content %}

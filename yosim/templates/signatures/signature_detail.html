@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% load static i18n %}
+
+{% block title %}Signature details{% endblock %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-lg-12">
+        <h2 class="page-header">Signature details</h2>
+    </div>
+    <!-- /.col-lg-12 -->
+</div>
+<!-- /.row -->
+
+<div class="row">
+    <div class="col-lg-12 signature-section">
+        <span>id: {{ signature.id }}</span>
+        <span>rule: {{ signature.rule }}</span>
+        <span>level: {{ signature.level }}</span>
+        <span>description: {{ signature.description }}</span>
+    </div>
+</div>
+<!-- /.row -->
+
+{% endblock content %}

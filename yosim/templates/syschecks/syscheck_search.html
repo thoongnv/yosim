@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% load static i18n %}
+{% load custom_pagination %}
+{% load custom_syscheck_tags %}
+
+{% block title %}Syscheck search{% endblock %}
+
+{% block content %}
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1>Syschecks</h1>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="box box-default">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Advaned Search</h3>
+                    <div class="box-tools pull-right">
+                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                        <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-remove"></i></button>
+                    </div>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                    <form action="{% url 'syschecks:search' %}">
+                        <div class="row">
+                            <div class="form-group col-sm-6">
+                                <label for="daterange">Daterange:</label>
+                                <div class="input-group">
+                                    <div class="input-group-addon custom-search-icon">
+                                        <i class="fa fa-calendar"></i>
+                                    </div>
+                                    <input id="syscheck-daterange" type="text" name="daterange" class="form-control pull-right">
+                                </div>
+                            </div>
+                            <div class="form-group col-sm-6">
+                                <label for="hosts">Hosts:</label>
+                                <div class="input-group">
+                                    <div class="input-group-addon custom-search-icon">
+                                        <i class="fa fa-desktop"></i>
+                                    </div>
+                                    <select class="selectpicker form-control" name="hosts" multiple data-actions-box="true">
+                                        {% for host in syschk_hosts %}
+                                            <option>{{ host }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-sm-6">
+                                <label for="owners">Owners:</label>
+                                <div class="input-group">
+                                    <div class="input-group-addon custom-search-icon">
+                                        <i class="fa fa-user-circle"></i>
+                                    </div>
+                                    <select class="selectpicker form-control" name="owners" multiple data-actions-box="true">
+                                        {% for owner in syschk_owners %}
+                                            <option>{{ owner }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group col-sm-6">
+                                <label for="ftypes">File types:</label>
+                                <div class="input-group">
+                                    <div class="input-group-addon custom-search-icon">
+                                        <i class="fa fa-tags"></i>
+                                    </div>
+                                    <select class="selectpicker form-control" name="ftypes" multiple data-actions-box="true">
+                                        {% for key, value in syschk_ftypes.items %}
+                                            <option value="{{ key }}">{{ value }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-sm-6">
+                                <label for="fpatterns">File patterns:</label>
+                                <div class="input-group">
+                                    <div class="input-group-addon custom-search-icon">
+                                        <i class="fa fa-file-text"></i>
+                                    </div>
+                                    <input class="form-control" name="fpatterns"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-sm-6">
+                                {% if previous_data %}
+                                    <input type="hidden" id="previous_data" value="{{ previous_data }}">
+                                {% endif %}
+                                <button type="submit" class="btn btn-primary btn-outline-primary fix-margin">Search</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <!-- /.box-body -->
+            </div>
+            <!-- /.box -->
+        </div>
+        <!-- /.col-lg-12 -->
+    </div>
+    <!-- /.row -->
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="box box-default">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Syschecks</h3>
+                    <div class="box-tools pull-right">
+                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                        <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-remove"></i></button>
+                    </div>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                    {% if syschecks %}
+                        <table id="syschecks-table" class="table table-striped table-bordered table-hover" width="100%">
+                            <thead>
+                                <tr>
+                                    <th>Latest modified time</th>
+                                    <th>File path</th>
+                                    <th>File size <i>(KB)</i></th>
+                                    <th>From</th>
+                                    <th>More &raquo;</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for syscheck in syschecks %}
+                                    <tr>
+                                        <input class="syscheck_id" type="hidden" value="{{ syscheck.id }}">
+                                        <td>{{ syscheck.mtime|timestamp_convert }}</td>
+                                        {% if syscheck.fpath|length >= 60 %}
+                                            <td data-toggle="tooltip" data-placement="bottom" title="{{ syscheck.fpath }}">{{ syscheck.fpath|truncatechars:60 }}</td>
+                                        {% else %}
+                                            <td>{{ syscheck.fpath }}</td>
+                                        {% endif %}
+                                        <td>{{ syscheck.size }}</td>
+                                        <td>{{ syscheck.syschk_fpath|to_syscheck_node }}</td>
+                                        <td><a class="btn btn-default btn-outline-default" role="button" href="{% url 'syschecks:detail' syscheck.id %}">Details &raquo;</a></td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <p>No syscheck was found</p>
+                    {% endif %}
+                </div>
+                <!-- /.box-body -->
+            </div>
+            <!-- /.box -->
+        </div>
+        <!-- /.col-lg-12 -->
+    </div>
+    <!-- /.row -->
+
+</section>
+
+{% endblock content %}

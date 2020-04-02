@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% load static i18n %}
+{% load custom_alert_tags %}
+
+{% block title %}Alert details{% endblock %}
+
+{% block content %}
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1>OSSEC Alerts</h1>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <div class="row">
+        <div class="col-lg-12 alert-chart">
+            {{ name }}
+        </div>
+    </div>
+    <!-- /.alert-chart -->
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="box box-default">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Alert details for alert id: {{ alert.alertid }}</h3>
+                    <div class="box-tools pull-right">
+                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                        <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-remove"></i></button>
+                    </div>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                    <div class="row">
+                        <div class="col-sm-2">
+                            <label>Datetime</label>
+                        </div>
+                        <div class="col-sm-10 timestamp">
+                            {{ alert.timestamp }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-2">
+                            <label>Server information</label>
+                        </div>
+                        <div class="col-sm-10">
+                            {{ alert.server.information }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-2">
+                            <label>Rule description</label>
+                        </div>
+                        <div class="col-sm-10">
+                            {{ alert.rule.rule_id }} - {{ alert.rule.description }} - Category: {{ alert.rule.category }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-2">
+                            <label>Alert level</label>
+                        </div>
+                        <div class="col-sm-10">
+                            {{ alert.level }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-2">
+                            <label>Alert location</label>
+                        </div>
+                        <div class="col-sm-10">
+                            {{ alert.location.name }}
+                        </div>
+                    </div>
+
+                    {% if alert.src_ip != '(null)' %}
+                        <div class="row">
+                            <div class="col-sm-2">
+                                <label>Source IP</label>
+                            </div>
+                            <div class="col-sm-10">
+                                {{ alert.src_ip }}
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {% if alert.dst_ip != '(null)' %}
+                        <div class="row">
+                            <div class="col-sm-2">
+                                <label>Destination IP</label>
+                            </div>
+                            <div class="col-sm-10">
+                                {{ alert.dst_ip }}
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {% if alert.src_port %}
+                        <div class="row">
+                            <div class="col-sm-2">
+                                <label>Source Port</label>
+                            </div>
+                            <div class="col-sm-10">
+                                {{ alert.src_port }}
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {% if alert.dst_port %}
+                        <div class="row">
+                            <div class="col-sm-2">
+                                <label>Destination Port</label>
+                            </div>
+                            <div class="col-sm-10">
+                                {{ alert.dst_port }}
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {% if alert.user != '(null)' %}
+                        <div class="row">
+                            <div class="col-sm-2">
+                                <label>User</label>
+                            </div>
+                            <div class="col-sm-10">
+                                {{ alert.user }}
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <div class="row">
+                        <div class="col-sm-2">
+                            <label>Full log message</label>
+                        </div>
+                        <div class="col-sm-10">
+                            {{ alert.full_log | linebreaks }}
+                        </div>
+                    </div>
+                    <!-- <div class="row">
+                        <div class="col-sm-2">
+                            <label>Is hidden</label>
+                        </div>
+                        <div class="col-sm-10">
+                            {{ alert.is_hidden }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-2">
+                            <label>TLD</label>
+                        </div>
+                        <div class="col-sm-10">
+                            {{ alert.tld }}
+                        </div>
+                    </div> -->
+                    <div class="row">
+                        <div class="col-sm-10 col-sm-offset-2">
+                            <a class="btn btn-default btn-outline-default" role="button" onclick="history.back()">Back to alerts</a>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.box-body -->
+            </div>
+            <!-- /.box -->
+        </div>
+    </div>
+</section>
+
+{% endblock content %}

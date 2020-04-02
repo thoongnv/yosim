@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% load static i18n %}
+{% load custom_pagination %}
+
+{% block title %}Signatures{% endblock %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-lg-12">
+        <h2 class="page-header">Signatures</h2>
+    </div>
+    <!-- /.col-lg-12 -->
+</div>
+<!-- /.row -->
+
+<div class="row">
+    {% for signature in signatures %}
+        <div class="col-lg-12 signature-section">
+            <input class="signature-id" type="hidden" value="{{ signature.id }}">
+            <span>rule: {{ signature.rule }}</span>
+            <span>level: {{ signature.level }}</span>
+            <span>description: {{ signature.description }}</span>
+            <a href="{% url 'signatures:detail' signature.id %}">Details &raquo;</a>
+        </div>
+        <!-- /.signature-section -->
+    {% endfor %}
+</div>
+<!-- /.row -->
+
+<div class="row">
+    {% if is_paginated %}
+        <div class="col-lg-12">
+            <ul class="pagination">
+                {% if page_obj.has_previous %}
+                    <li class="page-item"><a class="page-link"
+                    href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" tabindex="-1">Previous</a>
+                    </li>
+                {% endif %}
+                {% for i in paginator.page_range|get_paging_list:page_obj.number %}
+                    {% if page_obj.number == i %}
+                        <li class="page-item active">
+                            <a class="page-link" href="?page={{ i }}">{{ i }} <span class="sr-only">{{ i }} </span></a>
+                        </li>
+                    {% elif i == 'skip' %}
+                        <li class="page-item disabled"><a class="page-link" href="#">. . . . . . . . . .</a></li>
+                    {% else %}
+                        <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                    {% endif %}
+                {% endfor %}
+                {% if page_obj.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" tabindex="-1">Next</a>
+                    </li>
+                {% endif %}
+            </ul>
+            <!-- /.pagination -->
+        <div class="col-lg-12">
+        <!-- /.col-lg-12 -->
+    {% endif %}
+</div>
+<!-- /.row -->
+
+{% endblock content %}

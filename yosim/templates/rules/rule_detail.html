@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% load static i18n %}
+
+{% block title %}Agent details{% endblock %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-lg-12">
+        <h2 class="page-header">Agent details</h2>
+    </div>
+    <!-- /.col-lg-12 -->
+</div>
+<!-- /.row -->
+
+<div class="row">
+    <div class="col-lg-12 agent-section">
+        <span>id: {{ agent.id }}</span>
+        <span>server: {{ agent.server }}</span>
+        <span>last_contact: {{ agent.last_contact }}</span>
+        <span>ip_address: {{ agent.ip_address }}</span>
+        <span>version: {{ agent.version }}</span>
+        <span>name: {{ agent.name }}</span>
+        <span>ip_address: {{ agent.ip_address }}</span>
+        <span>information: {{ agent.information }}</span>
+    </div>
+</div>
+<!-- /.row -->
+
+{% endblock content %}

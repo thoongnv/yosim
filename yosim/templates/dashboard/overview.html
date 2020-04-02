@@ -1,0 +1,526 @@
+{% extends "base.html" %}
+
+{% load static i18n %}
+{% load custom_alert_tags %}
+{% load custom_syscheck_tags %}
+
+{% block title %}Overview{% endblock %}
+
+{% block content %}
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1>Dashboard</h1>
+</section>
+<!-- Main content -->
+<section class="content">
+    <!-- Small boxes (Stat box) -->
+    <div class="row">
+        <div class="col-lg-3 col-xs-6">
+            <!-- small box -->
+            <div class="small-box bg-aqua">
+                <div class="inner">
+                    <h3>{{ total_alerts }}</h3>
+                    <p>Alerts</p>
+                </div>
+                <div class="icon">
+                    <i class="ion ion-alert-circled"></i>
+                </div>
+                <a href="{% url 'alerts:list' %}" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+            </div>
+        </div>
+        <!-- ./col -->
+        <div class="col-lg-3 col-xs-6">
+            <!-- small box -->
+            <div class="small-box bg-green">
+                <div class="inner">
+                  <h3>{{ total_syschks }}</h3>
+                  <p>Syschecks</p>
+                </div>
+                <div class="icon">
+                    <i class="ion ion-compose"></i>
+                </div>
+                <a href="{% url 'syschecks:list' %}" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+            </div>
+        </div>
+        <!-- ./col -->
+        <div class="col-lg-3 col-xs-6">
+            <!-- small box -->
+            <div class="small-box bg-yellow">
+                <div class="inner">
+                    <h3>{{ total_rules }}</h3>
+                    <p>Rules</p>
+                </div>
+                <div class="icon">
+                    <i class="ion ion-document-text"></i>
+                </div>
+                <a href="{% url 'rules:list' %}" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+            </div>
+        </div>
+        <!-- ./col -->
+        <div class="col-lg-3 col-xs-6">
+            <!-- small box -->
+            <div class="small-box bg-red">
+                <div class="inner">
+                    <h3>{{ total_agents }}</h3>
+                    <p>Hosts</p>
+                </div>
+                <div class="icon">
+                    <i class="ion ion-android-desktop"></i>
+                </div>
+                <a href="{% url 'agents:list' %}" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+            </div>
+        </div>
+        <!-- ./col -->
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box">
+                <div class="box-header with-border">
+                    <h3 class="box-title">OSSEC Alerts Statistics</h3>
+                    <div class="stats-daterange box-tools pull-right">
+                        <div class="input-group">
+                            <input id="alert-stats-daterange" type="text" name="daterange" class="form-control pull-right">
+                            <div class="input-group-addon">
+                                <i class="fa fa-calendar"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <canvas id="alert-by-time"></canvas>
+                        </div>
+                        <!-- /.col -->
+                        <div class="col-md-4">
+                            <canvas id="alert-by-category" width="300px" height="300px"></canvas>
+                        </div>
+                        <!-- /.col -->
+                    </div>
+                    <!-- /.row -->
+                </div>
+                <!-- ./box-body -->
+            </div>
+            <!-- /.box -->
+        </div>
+        <!-- /.col -->
+    </div>
+    <!-- /.row -->
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Syschecks Statistics</h3>
+                    <div class="stats-daterange box-tools pull-right">
+                        <div class="input-group">
+                            <input id="syschk-stats-daterange" type="text" name="daterange" class="form-control pull-right">
+                            <div class="input-group-addon">
+                                <i class="fa fa-calendar"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <canvas id="syschk-by-time-host"></canvas>
+                        </div>
+                        <!-- /.col -->
+                        <div class="col-md-4">
+                            <canvas id="syschk-by-host" width="300px" height="300px"></canvas>
+                        </div>
+                        <!-- /.col -->
+                    </div>
+                    <!-- /.row -->
+                </div>
+                <!-- ./box-body -->
+            </div>
+            <!-- /.box -->
+        </div>
+        <!-- /.col -->
+    </div>
+    <!-- /.row -->
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="box box-default">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Recently syschecks</h3>
+                    <div class="box-tools pull-right">
+                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                        <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-remove"></i></button>
+                    </div>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body dataTables_disable_all">
+                    {% if syschecks %}
+                        <table id="syschecks-recent-table" class="table table-striped table-bordered table-hover" width="100%">
+                            <thead>
+                                <tr>
+                                    <th>Latest modified time</th>
+                                    <th>File path</th>
+                                    <th>File size <i>(KB)</i></th>
+                                    <th>From</th>
+                                    <th>More &raquo;</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for syscheck in syschecks %}
+                                    <tr>
+                                        <input class="syscheck_id" type="hidden" value="{{ syscheck.id }}">
+                                        <td>{{ syscheck.mtime | timestamp_convert }}</td>
+                                        {% if syscheck.fpath|length >= 60 %}
+                                            <td data-toggle="tooltip" data-placement="bottom" title="{{ syscheck.fpath }}">{{ syscheck.fpath|truncatechars:60 }}</td>
+                                        {% else %}
+                                            <td>{{ syscheck.fpath }}</td>
+                                        {% endif %}
+                                        <td>{{ syscheck.size }}</td>
+                                        <td>{{ syscheck.syschk_fpath|to_syscheck_node }}</td>
+                                        <td><a class="btn btn-default btn-outline-default" role="button" href="{% url 'syschecks:detail' syscheck.id %}">Details &raquo;</a></td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <p>No syscheck was found</p>
+                    {% endif %}
+                </div>
+                <!-- /.box-body -->
+            </div>
+            <!-- /.box -->
+        </div>
+        <!-- /.col-lg-12 -->
+    </div>
+    <!-- /.row -->
+</section>
+<!-- /.content -->
+
+{% endblock content %}
+
+{% block custom_javascript %}
+
+<script>
+    $(function() {
+        var alertChartColors = [
+            '#1E90FF',
+            '#9370DB',
+            '#800000',
+            '#2F4F4F',
+            '#90EE90',
+            '#4169E1',
+            '#800080',
+            '#00FA9A',
+            '#006400',
+            '#556B2F',
+            '#DAA520',
+            '#87CEFA',
+            '#DB7093',
+            '#00BFFF',
+            '#B8860B',
+            '#FF1493',
+            '#A0522D',
+            '#4682B4',
+            '#CD5C5C',
+            '#008B8B',
+            '#D2691E',
+            '#000080',
+            '#8a2be2',
+            '#6b8e23',
+            '#dda0dd',
+            '#2e8b57',
+            '#708090',
+            '#FF684A',
+            '#8B0000',
+            '#C3878D',
+            '#600082',
+            '#D8BFD8',
+        ];
+
+        var syschkChartColors = [
+            '#708090',
+            '#FF684A',
+            '#1E90FF',
+            '#D8BFD8',
+            '#4682B4',
+            '#CD5C5C',
+            '#008B8B',
+            '#D2691E',
+            '#000080',
+            '#8a2be2',
+            '#6b8e23',
+            '#dda0dd',
+            '#8B0000',
+            '#2e8b57',
+            '#C3878D',
+            '#9370DB',
+            '#800000',
+            '#600082',
+            '#2F4F4F',
+            '#90EE90',
+            '#4169E1',
+            '#800080',
+            '#00FA9A',
+            '#006400',
+            '#556B2F',
+            '#DAA520',
+            '#87CEFA',
+            '#DB7093',
+            '#00BFFF',
+            '#B8860B',
+            '#FF1493',
+            '#A0522D',
+        ];
+
+        $('#alert-stats-daterange').daterangepicker({
+            "opens": "left",
+            "alwaysShowCalendars": true,
+            "showCustomRangeLabel": false,
+            locale: {
+                format: 'DD/MM/YYYY h:mm A'
+            },
+            ranges: {
+               'Today': [moment().startOf('day'), moment().endOf('day')],
+               'Yesterday': [moment().subtract(1, 'days').startOf('day'), moment().subtract(1, 'days').endOf('day')],
+               'Last 7 Days': [moment().subtract(6, 'days').startOf('day'), moment().endOf('day')],
+               'Last 30 Days': [moment().subtract(29, 'days').startOf('day'), moment().endOf('day')],
+               'This Month': [moment().startOf('month'), moment().endOf('month')],
+               'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+            }
+        });
+
+        $('#syschk-stats-daterange').daterangepicker({
+            "opens": "left",
+            "alwaysShowCalendars": true,
+            "showCustomRangeLabel": false,
+            locale: {
+                format: 'DD/MM/YYYY h:mm A'
+            },
+            ranges: {
+               'Today': [moment().startOf('day'), moment().endOf('day')],
+               'Yesterday': [moment().subtract(1, 'days').startOf('day'), moment().subtract(1, 'days').endOf('day')],
+               'Last 7 Days': [moment().subtract(6, 'days').startOf('day'), moment().endOf('day')],
+               'Last 30 Days': [moment().subtract(29, 'days').startOf('day'), moment().endOf('day')],
+               'This Month': [moment().startOf('month'), moment().endOf('month')],
+               'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+            }
+        });
+
+        function build_alert_charts(startDate, endDate) {
+            $.ajax({
+                url: "{% url 'alerts:statistics' %}",
+                dataType: "json",
+                type: "POST",
+                data: {
+                    startDate: startDate.format('DD/MM/YYYY h:mm A'),
+                    endDate: endDate.format('DD/MM/YYYY h:mm A'),
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+                success: function(result) {
+                    if (window.alertByTime) {
+                        window.alertByTime.destroy();
+                    }
+
+                    if (result.by_time.count.length > 0) {
+                        // alert by datetime chart
+                        var ctx = document.getElementById("alert-by-time").getContext('2d');
+                        alertByTimeColor = [];
+                        for (var i = 0; i < result.by_time.count.length; i++) {
+                            alertByTimeColor.push(alertChartColors[0]);
+                        }
+
+                        window.alertByTime = new Chart(ctx, {
+                            type: 'bar',
+                            data: {
+                                labels: result.by_time.data,
+                                datasets: [{
+                                    label: result.by_time.label,
+                                    data: result.by_time.count,
+                                    backgroundColor: alertByTimeColor,
+                                    borderColor: alertByTimeColor,
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                scales: {
+                                    yAxes: [{
+                                        ticks: {
+                                            beginAtZero:true
+                                        }
+                                    }]
+                                },
+                                legend: {
+                                    labels: {
+                                        'boxWidth': 0,
+                                        'fontSize': 14,
+                                        'fontStyle': 'italic',
+                                    },
+                                }
+                            }
+                        });
+                    }
+
+                    if (window.alertByCate) {
+                        window.alertByCate.destroy();
+                    }
+
+                    if (result.by_cate.count.length > 0) {
+                        // alert by category chart
+                        var ctx = document.getElementById("alert-by-category").getContext('2d');
+                        alertByCateColor = [];
+                        for (var i = 0; i < result.by_cate.count.length; i++) {
+                            alertByCateColor.push(alertChartColors[i]);
+                        }
+
+                        window.alertByCate = new Chart(ctx, {
+                            type: 'pie',
+                            data: {
+                                labels: result.by_cate.data,
+                                datasets: [{
+                                    data: result.by_cate.count,
+                                    backgroundColor: alertByCateColor,
+                                    borderColor: alertByCateColor,
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                title: {
+                                    display: true,
+                                    fontSize: 14,
+                                    fontStyle: 'italic',
+                                    text: result.by_cate.label
+                                },
+                                legend: {
+                                    display: true,
+                                    position: 'bottom'
+                                }
+                            }
+                        });
+                    }
+                },
+                error: function(error) {
+                    console.log(error);
+                },
+            });
+        };
+
+        function build_syschk_charts(startDate, endDate) {
+            $.ajax({
+                url: "{% url 'syschecks:statistics' %}",
+                dataType: "json",
+                type: "POST",
+                data: {
+                    startDate: startDate.format('DD/MM/YYYY h:mm A'),
+                    endDate: endDate.format('DD/MM/YYYY h:mm A'),
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+                success: function(result) {
+                    if (window.syschkByTimeHost) {
+                        window.syschkByTimeHost.destroy();
+                    }
+
+                    // syscheck by time host chart
+                    var ctx = document.getElementById("syschk-by-time-host").getContext('2d');
+                    var datasets = [];
+                    var colorCount = 0;
+                    for (var key in result.by_time_host.datas) {
+                        datasets.push({
+                            'label': key,
+                            'data': result.by_time_host.datas[key],
+                            'backgroundColor': syschkChartColors[colorCount],
+                        });
+                        colorCount++;
+                    }
+
+                    window.syschkByTimeHost = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: result.by_time_host.labels,
+                            datasets: datasets,
+                        },
+                        options: {
+                            title: {
+                                display: true,
+                                fontSize: 14,
+                                fontStyle: 'italic',
+                                text: result.by_time_host.text,
+                            },
+                            scales: {
+                                yAxes: [{
+                                    ticks: {
+                                        beginAtZero:true
+                                    }
+                                }],
+                            },
+                            legend: {
+                                position: 'bottom',
+                            },
+                            tooltips: {
+                                mode: 'index',
+                                intersect: false
+                            },
+                        }
+                    });
+
+                    if (window.syschkByHost) {
+                        window.syschkByHost.destroy();
+                    }
+
+                    // syscheck by host chart
+                    if (result.by_host.count.length > 0) {
+                        var ctx = document.getElementById("syschk-by-host").getContext('2d');
+                        syschkByHostColor = [];
+                        for (var i = 0; i < result.by_host.count.length; i++) {
+                            syschkByHostColor.push(syschkChartColors[i]);
+                        }
+
+                        window.syschkByHost = new Chart(ctx, {
+                            type: 'pie',
+                            data: {
+                                labels: result.by_host.data,
+                                datasets: [{
+                                    data: result.by_host.count,
+                                    backgroundColor: syschkByHostColor,
+                                    borderColor: syschkByHostColor,
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                title: {
+                                    display: true,
+                                    fontSize: 14,
+                                    fontStyle: 'italic',
+                                    text: result.by_host.label
+                                },
+                                legend: {
+                                    display: true,
+                                    position: 'bottom'
+                                }
+                            }
+                        });
+                    }
+                },
+                error: function(error) {
+                    console.log(error);
+                },
+            });
+        };
+
+        $('#alert-stats-daterange').on('apply.daterangepicker', function(event, datepicker) {
+            build_alert_charts(datepicker.startDate, datepicker.endDate)
+        });
+
+        $('#syschk-stats-daterange').on('apply.daterangepicker', function(event, datepicker) {
+            build_syschk_charts(datepicker.startDate, datepicker.endDate)
+        });
+
+        build_alert_charts(moment().startOf('day'), moment().endOf('day'));
+        build_syschk_charts(moment().startOf('day'), moment().endOf('day'));
+    });
+</script>
+
+{% endblock custom_javascript %}

@@ -1,0 +1,69 @@
+/* Main project CSS */
+
+/* Disable some Datatable element */
+.dataTables_disable_all .dataTables_length {
+    display: none;
+}
+
+.dataTables_disable_all .dataTables_info {
+    display: none;
+}
+
+.dataTables_disable_all .dataTables_paginate {
+    display: none;
+}
+
+table.dataTable td.focus {
+    outline: 2px solid #269abc;
+    outline-offset: -1px;
+}
+
+.d2h-file-wrapper {
+    border: none;
+    margin-bottom: 0px;
+}
+
+/* Disable Diff2Html show file */
+.d2h-file-header {
+    display: none;
+}
+
+.custom-pagination {
+    margin: 0px;
+}
+
+.git-diff-content {
+    padding: 0px;
+}
+
+.navbar-nav > .user-menu > .dropdown-menu > li.user-header {
+  height: 110px;
+}
+
+.label-custom {
+    margin-left: 10px;
+}
+
+.pre-custom {
+    max-height: 400px;
+}
+
+.input-group .bootstrap-select {
+    max-width: 455px;
+}
+
+.fix-margin {
+    margin-top: 25px;
+}
+
+.stats-daterange {
+    position: initial !important;
+}
+
+.stats-daterange .input-group {
+    width: 350px;
+}
+
+.custom-search-icon {
+    min-width: 40px;
+}

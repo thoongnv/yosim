@@ -1,0 +1,232 @@
+{% extends "base.html" %}
+
+{% load static i18n %}
+{% load custom_pagination %}
+{% load custom_alert_tags %}
+{% load custom_syscheck_tags %}
+
+{% block title %}Alerts{% endblock %}
+
+{% block content %}
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1>OSSEC Alerts</h1>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="box box-default">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Advaned Search</h3>
+                    <div class="box-tools pull-right">
+                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                        <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-remove"></i></button>
+                    </div>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                    <form action="{% url 'alerts:search' %}">
+                        <div class="row">
+                            <div class="form-group col-sm-6">
+                                <label for="daterange">Daterange:</label>
+                                <div class="input-group">
+                                    <div class="input-group-addon custom-search-icon">
+                                        <i class="fa fa-calendar"></i>
+                                    </div>
+                                    <input id="alert-daterange" type="text" name="daterange" class="form-control pull-right">
+                                </div>
+                            </div>
+                            <div class="form-group col-sm-6">
+                                <label for="hosts">Hosts:</label>
+                                <div class="input-group">
+                                    <div class="input-group-addon custom-search-icon">
+                                        <i class="fa fa-desktop"></i>
+                                    </div>
+                                    <select class="selectpicker form-control" name="hosts" multiple data-actions-box="true">
+                                        {% for host in alert_hosts %}
+                                            {% if host.agent_id == '000' %}
+                                                <option value="{{ host.agent_id }}">{{ host.name }}</option>
+                                            {% else %}
+                                                <option value="{{ host.agent_id }}">({{ host.name }}) {{ host.ip_address }}</option>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-sm-6">
+                                <label for="categories">Categories:</label>
+                                <div class="input-group">
+                                    <div class="input-group-addon custom-search-icon">
+                                        <i class="fa fa-tags"></i>
+                                    </div>
+                                    <select class="selectpicker form-control" name="categories" multiple data-actions-box="true">
+                                        {% for category in alert_categories %}
+                                            <option value="{{ category.cat_id }}">{{ category.cat_name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group col-sm-6">
+                                <label for="levels">Levels:</label>
+                                <div class="input-group">
+                                    <div class="input-group-addon custom-search-icon">
+                                        <i class="fa fa-level-up"></i>
+                                    </div>
+                                    <select class="selectpicker form-control" name="levels" multiple data-actions-box="true">
+                                        {% for level in alert_levels %}
+                                            <option value="{{ level.level__number }}">{{ level.level__number }} - {{ level.level__common_name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-sm-6">
+                                <label for="users">Users:</label>
+                                <div class="input-group">
+                                    <div class="input-group-addon custom-search-icon">
+                                        <i class="fa fa-user-circle-o"></i>
+                                    </div>
+                                    <select class="selectpicker form-control" name="users" multiple data-actions-box="true">
+                                        {% for user in alert_users %}
+                                            <option>{{ user }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group col-sm-6">
+                                <button type="submit" class="btn btn-primary btn-outline-primary fix-margin">Search</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <!-- /.box -->
+        </div>
+        <!-- /.col-lg-12 -->
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="box box-default">
+                <div class="box-header with-border">
+                    <h3 class="box-title">OSSEC Alerts</h3>
+                    <div class="box-tools pull-right">
+                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                        <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-remove"></i></button>
+                    </div>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body dataTables_disable_all">
+                    {% if alerts %}
+                    <table id="alerts-table" class="table table-responsive table-striped table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>Datetime</th>
+                                <th>From</th>
+                                <th>Description</th>
+                                <th>Level</th>
+                                <th>Full log</th>
+                                <th>More &raquo;</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for alert in alerts %}
+                                <tr>
+                                    <td>{{ alert.timestamp|timestamp_convert }}</td>
+                                    <td>{{ alert.location.name|location_convert }}</td>
+                                    <td>{{ alert.rule.description }}</td>
+                                    <td>{{ alert.level.common_name }}</td>
+                                    <td style="word-break: break-all;">{{ alert.full_log }}</td>
+                                    <td><a class="btn btn-default btn-outline-default" role="button" href="{% url 'alerts:detail' alert.id %}">Details &raquo;</a></td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <!-- /#alerts-table -->
+                    {% else %}
+                        <h4>No alerts was found</h4>
+                    {% endif %}
+                </div>
+                <!-- /.box-body -->
+                <div class="box-footer">
+                    <div class="row">
+                        {% if is_paginated %}
+                            <div class="col-lg-12">
+                                <ul class="pagination custom-pagination">
+                                    {% if page_obj.has_previous %}
+                                        <li class="page-item"><a class="page-link"
+                                        href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+                                    {% else %}
+                                        <li class="page-item disabled">
+                                            <a class="page-link" href="#" tabindex="-1">Previous</a>
+                                        </li>
+                                    {% endif %}
+                                    {% for i in paginator.page_range|get_paging_list:page_obj.number %}
+                                        {% if page_obj.number == i %}
+                                            <li class="page-item active">
+                                                <a class="page-link" href="?page={{ i }}">{{ i }} <span class="sr-only">{{ i }} </span></a>
+                                            </li>
+                                        {% elif i == 'skip' %}
+                                            <li class="page-item disabled"><a class="page-link" href="#">. . . . . . . . . .</a></li>
+                                        {% else %}
+                                            <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                                        {% endif %}
+                                    {% endfor %}
+                                    {% if page_obj.has_next %}
+                                        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+                                    {% else %}
+                                        <li class="page-item disabled">
+                                            <a class="page-link" href="#" tabindex="-1">Next</a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                                <!-- /.pagination -->
+                            </div>
+                            <!-- /.col-lg-12 -->
+                        {% endif %}
+                    </div>
+                    <!-- /.row -->
+                </div>
+                <!-- /.box-footer -->
+            </div>
+            <!-- /.box -->
+        </div>
+        <!-- /.col-lg-12 -->
+    </div>
+    <!-- /.row -->
+
+</section>
+
+{% endblock content %}
+
+{% block custom_javascript %}
+
+    <script type="text/javascript">
+        $( document ).ready(function() {
+            $("input[name='daterange']").daterangepicker({
+                timePicker: true,
+                showCustomRangeLabel: false,
+                locale: {
+                    format: 'DD/MM/YYYY h:mm A'
+                },
+                startDate: '{{ start_date|safe }}',
+                endDate: '{{ end_date|safe }}',
+                ranges: {
+                   'Today': [moment().startOf('day'), moment().endOf('day')],
+                   'Yesterday': [moment().subtract(1, 'days').startOf('day'), moment().subtract(1, 'days').endOf('day')],
+                   'Last 7 Days': [moment().subtract(6, 'days').startOf('day'), moment().endOf('day')],
+                   'Last 30 Days': [moment().subtract(29, 'days').startOf('day'), moment().endOf('day')],
+                   'This Month': [moment().startOf('month'), moment().endOf('month')],
+                   'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                }
+            });
+        });
+    </script>
+
+{% endblock custom_javascript %}
